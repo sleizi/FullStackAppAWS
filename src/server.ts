@@ -31,8 +31,27 @@ import { filterImageFromURL, deleteLocalFiles } from './util/util';
 
   //! END @TODO1
 
+  function validateURL(iURL: string) {
+    const regEx = "http(|s):.*\.(jpg|png|jpeg|gif)";
+    const validURL = new RegExp(regEx);
+    return validURL.test(iURL);
+  }
+
   app.get("/filteredimage", async (req, res) => {
-      
+    const image_url = req.query.image_url;
+    if (validateURL(image_url)) {
+      const filterImg = await filterImageFromURL(image_url);
+
+      res.sendFile(filterImg, function (err) {
+        if (err) {
+          res.status(406).send("Error occured while accessing the image!");
+        } else {
+          deleteLocalFiles([filterImg]);
+        }
+
+      });
+
+    } else res.status(404).send("Invalid image URL!");
   });
 
   // Root Endpoint
